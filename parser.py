@@ -2,6 +2,9 @@
 from selenium import webdriver
 from bs4 import BeautifulSoup
 
+user_email = "put email here"
+user_password = "put password here"
+
 # specifies the path to the chromedriver.exe
 driver = webdriver.Chrome("./chromedriver")
 
@@ -12,13 +15,13 @@ driver.get("https://www.linkedin.com/uas/login?")
 username = driver.find_element_by_id("username")
 
 # send_keys() to simulate key strokes
-username.send_keys("put email here")
+username.send_keys(user_email)
 
 # locate password form by_class_name
 password = driver.find_element_by_id("password")
 
 # send_keys() to simulate key strokes
-password.send_keys("put password here")
+password.send_keys(user_password)
 
 # locate submit button by_class_name
 log_in_button = driver.find_element_by_xpath("//*[@id='app__container']/main/div/form/div[3]/button")
