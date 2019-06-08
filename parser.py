@@ -60,4 +60,4 @@ def get_profile_urls(driver):
 if __name__ == "__main__":
     driver = initialize_driver()
     login_linkedin(driver)
-    get_profile_urls(driver)
+    set_of_profiles = get_profile_urls(driver)
