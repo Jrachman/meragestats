@@ -1,10 +1,12 @@
 # import web driver
 from selenium import webdriver
 from bs4 import BeautifulSoup
+import string
 
-USER_EMAIL = "katiexiong1998@hotmail.com"
-USER_PASSWORD = "PaulMerage123"
+USER_EMAIL = "blank"
+USER_PASSWORD = "blank"
 LINKEDIN_ROOT_URL = "https://www.linkedin.com"
+PEOPLE_SEARCH_URL = f"{LINKEDIN_ROOT_URL}/search/results/people/?"
 
 
 def initialize_driver():
@@ -37,23 +39,29 @@ def login_linkedin(driver):
 
 
 def get_profile_urls(driver):
-    merage_search_url = f"{LINKEDIN_ROOT_URL}/search/results/people/?facetSchool=%5B%2217948%22%5D&origin=FACETED_SEARCH&page="
-
     set_of_profiles = set()
-    for page_num in range(1, 101):
-        driver.get(f"{merage_search_url}{page_num}")
 
-        soup = BeautifulSoup(driver.page_source, "html.parser")
-        for link in soup.find_all("a"):
-            profile_url = link.get("href")
-            if "/in/" in profile_url and profile_url not in set_of_profiles:
-                print(profile_url)
-                set_of_profiles.add(profile_url)
-                # instead of adding to a set, run the linkedin profile extracter
-                # use linkedin username as unique identifier to eliminate the possibility of not being able to differentiate between two John Apple's
+    for letter in string.ascii_lowercase:
+        search_args = f'facetNetwork=%5B"F"%2C"S"%2C"O"%5D&facetSchool=%5B%2217948%22%5D&keywords={letter}&origin=FACETED_SEARCH&page='
+
+        for page_num in range(1, 101):
+            driver.get(f"{PEOPLE_SEARCH_URL}{search_args}{page_num}")
+
+            soup = BeautifulSoup(driver.page_source, "html.parser")
+            for link in soup.find_all("a"):
+                profile_url = link.get("href")
+                if profile_url and "/in/" in profile_url and profile_url not in set_of_profiles:
+                    print(profile_url)
+                    set_of_profiles.add(profile_url)
+                    # instead of adding to a set, run the linkedin profile extracter
+                    # use linkedin username as unique identifier to eliminate the possibility of not being able to differentiate between two John Apple's
+            print(f"current number of profiles captured: {len(set_of_profiles)}, CURRENT letter: {letter}")
+
+        print(f"current number of profiles captured: {len(set_of_profiles)}, NEXT letter: {letter}")
 
     print(set_of_profiles, len(set_of_profiles))
     # maybe push information to csv
+
     return set_of_profiles
 
 
