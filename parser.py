@@ -3,7 +3,8 @@ from selenium import webdriver
 from bs4 import BeautifulSoup
 import string
 import time
-import credentials  # this is a module that I created in order to hold my credentials
+import multiprocessing
+from credentials import *  # this is a module that I created in order to hold my credentials
 
 LINKEDIN_ROOT_URL = "https://www.linkedin.com"
 PEOPLE_SEARCH_URL = f"{LINKEDIN_ROOT_URL}/search/results/people/?"
@@ -110,11 +111,29 @@ def get_profile_urls_merage_page(driver, from_year, to_year):
         set_of_profiles |= subset_of_profiles
         print(f"subset: {len(subset_of_profiles)}", f"set: {len(set_of_profiles)}")
 
+    return set_of_profiles
+
+
+def run_merage_profile_parse(user_email, user_password, from_year, end_year):
+    driver = initialize_driver()
+    login_linkedin(driver, user_email, user_password)
+    set_of_profiles = get_profile_urls_merage_page(driver, from_year, end_year)
+    driver.quit()
+
+    return set_of_profiles
+
+
+def multiprocess_gather_merage_profiles():
+    arguments = (
+        (GARRET_EMAIL, GARRET_PASSWORD, 2008, 2012),
+        (JULIAN_EMAIL, JULIAN_PASSWORD, 2013, 2015),
+        (KATIE_EMAIL, KATIE_PASSWORD, 2016, 2019),
+    )
+    p = multiprocessing.Process(target=run_merage_profile_parse, args=arguments)
+    p.start()
+    p.join()
+
 
 if __name__ == "__main__":
-    driver = initialize_driver()
-    login_linkedin(driver, credentials.JULIAN_EMAIL, credentials.JULIAN_PASSWORD)
-    # set_of_profiles = get_profile_urls(driver)
-    get_profile_urls_merage_page(driver, 2008, 2010)
-
-    driver.quit()
+    final_set = multiprocess_gather_merage_profiles()
+    print(final_set, len(final_set))
