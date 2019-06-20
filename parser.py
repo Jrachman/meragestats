@@ -129,9 +129,9 @@ def multiprocess_gather_merage_profiles():
         (JULIAN_EMAIL, JULIAN_PASSWORD, 2013, 2015),
         (KATIE_EMAIL, KATIE_PASSWORD, 2016, 2019),
     )
-    p = multiprocessing.Process(target=run_merage_profile_parse, args=arguments)
-    p.start()
-    p.join()
+    with multiprocessing.Pool(processes=3) as pool:
+        results = pool.starmap(run_merage_profile_parse, arguments)
+        print(results)
 
 
 if __name__ == "__main__":
