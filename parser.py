@@ -3,9 +3,8 @@ from selenium import webdriver
 from bs4 import BeautifulSoup
 import string
 import time
+import credentials  # this is a module that I created in order to hold my credentials
 
-USER_EMAIL = "tombradypaulmerage@gmail.com"
-USER_PASSWORD = "fuckyoupaul69"
 LINKEDIN_ROOT_URL = "https://www.linkedin.com"
 PEOPLE_SEARCH_URL = f"{LINKEDIN_ROOT_URL}/search/results/people/?"
 
@@ -15,19 +14,19 @@ def initialize_driver():
     return webdriver.Chrome("./chromedriver")
 
 
-def login_linkedin(driver):
+def login_linkedin(driver, user_email, user_password):
     # driver.get method() will navigate to a page given by the URL address
     driver.get(f"{LINKEDIN_ROOT_URL}/uas/login?")
 
     # locate email form by_class_name
     username = driver.find_element_by_id("username")
     # send_keys() to simulate key strokes
-    username.send_keys(USER_EMAIL)
+    username.send_keys(user_email)
 
     # locate password form by_class_name
     password = driver.find_element_by_id("password")
     # send_keys() to simulate key strokes
-    password.send_keys(USER_PASSWORD)
+    password.send_keys(user_password)
     # password.submit()
 
     # locate submit button by_class_name
@@ -74,9 +73,9 @@ def get_profile_urls(driver):
     return set_of_profiles
 
 
-def get_profile_urls_merage_page(driver):
+def get_profile_urls_merage_page(driver, from_year, to_year):
     set_of_profiles = set()
-    years = range(2008, 2020)
+    years = range(from_year, to_year + 1)
 
     prefix_url = "https://www.linkedin.com/school/uci-paul-merage-school-of-business/people/"
 
@@ -114,8 +113,8 @@ def get_profile_urls_merage_page(driver):
 
 if __name__ == "__main__":
     driver = initialize_driver()
-    login_linkedin(driver)
+    login_linkedin(driver, credentials.JULIAN_EMAIL, credentials.JULIAN_PASSWORD)
     # set_of_profiles = get_profile_urls(driver)
-    get_profile_urls_merage_page(driver)
+    get_profile_urls_merage_page(driver, 2008, 2010)
 
     driver.quit()
