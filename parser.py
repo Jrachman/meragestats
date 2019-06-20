@@ -4,8 +4,8 @@ from bs4 import BeautifulSoup
 import string
 import time
 
-USER_EMAIL = "paulmeragebusiness@gmail.com"
-USER_PASSWORD = "paulmerageismydad69"
+USER_EMAIL = "tombradypaulmerage@gmail.com"
+USER_PASSWORD = "fuckyoupaul69"
 LINKEDIN_ROOT_URL = "https://www.linkedin.com"
 PEOPLE_SEARCH_URL = f"{LINKEDIN_ROOT_URL}/search/results/people/?"
 
@@ -17,7 +17,7 @@ def initialize_driver():
 
 def login_linkedin(driver):
     # driver.get method() will navigate to a page given by the URL address
-    driver.get("https://www.linkedin.com/uas/login?")
+    driver.get(f"{LINKEDIN_ROOT_URL}/uas/login?")
 
     # locate email form by_class_name
     username = driver.find_element_by_id("username")
@@ -28,6 +28,7 @@ def login_linkedin(driver):
     password = driver.find_element_by_id("password")
     # send_keys() to simulate key strokes
     password.send_keys(USER_PASSWORD)
+    # password.submit()
 
     # locate submit button by_class_name
     log_in_button = driver.find_element_by_xpath("//*[@id='app__container']/main/div/form/div[3]/button")
@@ -37,6 +38,11 @@ def login_linkedin(driver):
     # log_in_button = driver.find_element_by_xpath('//*[@type="submit"]')
     # .click() to mimic button click
     log_in_button.click()
+
+
+def get_hrefs(driver, set_of_profiles):
+    soup = BeautifulSoup(driver.page_source, "html.parser")
+    return {link.get("href") for link in soup.find_all("a") if link.get("href") and "/in/" in link.get("href") and link.get("href") not in set_of_profiles}
 
 
 def get_profile_urls(driver):
@@ -49,8 +55,7 @@ def get_profile_urls(driver):
             for page_num in range(1, 101):
                 driver.get(f"{PEOPLE_SEARCH_URL}{search_args}{page_num}")
 
-                soup = BeautifulSoup(driver.page_source, "html.parser")
-                subset_of_profiles = {link.get("href") for link in soup.find_all("a") if link.get("href") and "/in/" in link.get("href") and link.get("href") not in set_of_profiles}
+                subset_of_profiles = get_hrefs(driver, set_of_profiles)
                 if not subset_of_profiles:
                     break
                 else:
@@ -80,22 +85,31 @@ def get_profile_urls_merage_page(driver):
         driver.get(f"{prefix_url}{year_args}")
 
         SCROLL_PAUSE_TIME = 0.5
-
         # Get scroll height
         last_height = driver.execute_script("return document.body.scrollHeight")
+        new_height = 0
 
         while True:
             # Scroll down to bottom
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            counter = 0
+            while new_height == last_height:
+                # Wait to load page
+                time.sleep(SCROLL_PAUSE_TIME)
+                # Calculate new scroll height and compare with last scroll height
+                new_height = driver.execute_script("return document.body.scrollHeight")
+                if counter == 20:
+                    break
+                else:
+                    counter += 1
 
-            # Wait to load page
-            time.sleep(SCROLL_PAUSE_TIME)
-
-            # Calculate new scroll height and compare with last scroll height
-            new_height = driver.execute_script("return document.body.scrollHeight")
             if new_height == last_height:
                 break
             last_height = new_height
+
+        subset_of_profiles = get_hrefs(driver, set_of_profiles)
+        set_of_profiles |= subset_of_profiles
+        print(f"subset: {len(subset_of_profiles)}", f"set: {len(set_of_profiles)}")
 
 
 if __name__ == "__main__":
@@ -103,3 +117,5 @@ if __name__ == "__main__":
     login_linkedin(driver)
     # set_of_profiles = get_profile_urls(driver)
     get_profile_urls_merage_page(driver)
+
+    driver.quit()
