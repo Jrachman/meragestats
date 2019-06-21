@@ -138,7 +138,7 @@ def multiprocess_gather_merage_profiles():
         (SALLY_EMAIL, SALLY_EMAIL, 2013, 2016),
         (TOMMY_EMAIL, TOMMY_PASSWORD, 2017, 2019)
     )
-    with multiprocessing.Pool(processes=3) as pool:
+    with multiprocessing.Pool(processes=4) as pool:
         results = pool.starmap(run_merage_profile_parse, arguments)
         nresults = set()
         for result in results:
