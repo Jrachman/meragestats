@@ -3,6 +3,7 @@ from selenium import webdriver
 from bs4 import BeautifulSoup
 import string
 import time
+import csv
 import multiprocessing
 from credentials import *  # this is a module that I created in order to hold my credentials
 
@@ -123,17 +124,30 @@ def run_merage_profile_parse(user_email, user_password, from_year, end_year):
     return set_of_profiles
 
 
+def create_csv_from_set(set_of_profiles):
+    with csv.writer(open("merage_links.csv", "w")) as cml:
+        for link in set_of_profiles:
+            cml.writerow(link)
+
+
 def multiprocess_gather_merage_profiles():
     arguments = (
-        (GARRET_EMAIL, GARRET_PASSWORD, 2008, 2012),
-        (JULIAN_EMAIL, JULIAN_PASSWORD, 2013, 2015),
-        (KATIE_EMAIL, KATIE_PASSWORD, 2016, 2019),
+        # (GARRET_EMAIL, GARRET_PASSWORD, 2008, 2010),
+        (KATIE_EMAIL, KATIE_PASSWORD, 2008, 2009),
+        (JULIAN_EMAIL, JULIAN_PASSWORD, 2010, 2012),
+        (SALLY_EMAIL, SALLY_EMAIL, 2013, 2016),
+        (TOMMY_EMAIL, TOMMY_PASSWORD, 2017, 2019)
     )
     with multiprocessing.Pool(processes=3) as pool:
         results = pool.starmap(run_merage_profile_parse, arguments)
-        print(results)
+        nresults = set()
+        for result in results:
+            nresults |= result
+        return nresults
 
 
 if __name__ == "__main__":
     final_set = multiprocess_gather_merage_profiles()
     print(final_set, len(final_set))
+
+    create_csv_from_set(final_set)
