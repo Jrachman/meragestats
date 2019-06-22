@@ -125,7 +125,8 @@ def run_merage_profile_parse(user_email, user_password, from_year, end_year):
 
 
 def create_csv_from_set(set_of_profiles):
-    with csv.writer(open("merage_links.csv", "w")) as cml:
+    with open("merage_links.csv", "w") as ml:
+        cml = csv.writer(ml)
         for link in set_of_profiles:
             cml.writerow(link)
 
@@ -135,7 +136,7 @@ def multiprocess_gather_merage_profiles():
         # (GARRET_EMAIL, GARRET_PASSWORD, 2008, 2010),
         (KATIE_EMAIL, KATIE_PASSWORD, 2008, 2009),
         (JULIAN_EMAIL, JULIAN_PASSWORD, 2010, 2012),
-        (SALLY_EMAIL, SALLY_EMAIL, 2013, 2016),
+        (SALLY_EMAIL, SALLY_PASSWORD, 2013, 2016),
         (TOMMY_EMAIL, TOMMY_PASSWORD, 2017, 2019)
     )
     with multiprocessing.Pool(processes=4) as pool:
