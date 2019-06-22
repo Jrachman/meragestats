@@ -131,7 +131,7 @@ def create_csv_from_set(set_of_profiles):
             cml.writerow(link)
 
 
-def multiprocess_gather_merage_profiles():
+def multiprocess_gather_merage_profiles(at_once=False):
     arguments = (
         # (GARRET_EMAIL, GARRET_PASSWORD, 2008, 2010),
         (KATIE_EMAIL, KATIE_PASSWORD, 2008, 2009),
@@ -139,16 +139,23 @@ def multiprocess_gather_merage_profiles():
         (SALLY_EMAIL, SALLY_PASSWORD, 2013, 2016),
         (TOMMY_EMAIL, TOMMY_PASSWORD, 2017, 2019)
     )
-    with multiprocessing.Pool(processes=4) as pool:
-        results = pool.starmap(run_merage_profile_parse, arguments)
-        nresults = set()
-        for result in results:
-            nresults |= result
-        return nresults
+    nresults = set()
+
+    if at_once:
+        with multiprocessing.Pool(processes=4) as pool:
+            # running 4 accounts all at the same time does not perform well with the slow loading
+            results = pool.starmap(run_merage_profile_parse, arguments)
+            for result in results:
+                nresults |= result
+    else:
+        for argument in arguments:
+            nresults |= run_merage_profile_parse(*argument)
+
+    return nresults
 
 
 if __name__ == "__main__":
     final_set = multiprocess_gather_merage_profiles()
     print(final_set, len(final_set))
 
-    create_csv_from_set(final_set)
+    create_csv_from_set(list(final_set))
