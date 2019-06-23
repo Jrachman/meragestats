@@ -1,43 +1,12 @@
-from selenium import webdriver
 from bs4 import BeautifulSoup
 import string
 import time
 import csv
 import multiprocessing
-from credentials import *  # this is a module that I created in order to hold my credentials
+import sel_linkedin
+import credentials  # this is a module that I created in order to hold my credentials
 
-LINKEDIN_ROOT_URL = "https://www.linkedin.com"
-PEOPLE_SEARCH_URL = f"{LINKEDIN_ROOT_URL}/search/results/people/?"
-
-
-def initialize_driver():
-    # specifies the path to the chromedriver.exe
-    return webdriver.Chrome("./chromedriver")
-
-
-def login_linkedin(driver, user_email, user_password):
-    # driver.get method() will navigate to a page given by the URL address
-    driver.get(f"{LINKEDIN_ROOT_URL}/uas/login?")
-
-    # locate email form by_class_name
-    username = driver.find_element_by_id("username")
-    # send_keys() to simulate key strokes
-    username.send_keys(user_email)
-
-    # locate password form by_class_name
-    password = driver.find_element_by_id("password")
-    # send_keys() to simulate key strokes
-    password.send_keys(user_password)
-    # password.submit()
-
-    # locate submit button by_class_name
-    log_in_button = driver.find_element_by_xpath("//*[@id='app__container']/main/div/form/div[3]/button")
-    # locate submit button by_class_id
-    # log_in_button = driver.find_element_by_class_id('login submit-button')
-    # locate submit button by_xpath
-    # log_in_button = driver.find_element_by_xpath('//*[@type="submit"]')
-    # .click() to mimic button click
-    log_in_button.click()
+PEOPLE_SEARCH_URL = f"{sel_linkedin.LINKEDIN_ROOT_URL}/search/results/people/?"
 
 
 def get_hrefs(driver, set_of_profiles):
@@ -115,8 +84,8 @@ def get_profile_urls_merage_page(driver, from_year, to_year):
 
 
 def run_merage_profile_parse(user_email, user_password, from_year, end_year):
-    driver = initialize_driver()
-    login_linkedin(driver, user_email, user_password)
+    driver = sel_linkedin.initialize_driver()
+    sel_linkedin.login_linkedin(driver, user_email, user_password)
     set_of_profiles = get_profile_urls_merage_page(driver, from_year, end_year)
     driver.quit()
 
@@ -133,10 +102,10 @@ def create_csv_from_set(set_of_profiles):
 def gather_merage_profiles(multiple_at_once=False):
     arguments = (
         # (GARRET_EMAIL, GARRET_PASSWORD, 2008, 2010),
-        (KATIE_EMAIL, KATIE_PASSWORD, 2008, 2009),
-        (JULIAN_EMAIL, JULIAN_PASSWORD, 2010, 2012),
-        (SALLY_EMAIL, SALLY_PASSWORD, 2013, 2016),
-        (TOMMY_EMAIL, TOMMY_PASSWORD, 2017, 2019)
+        (credentials.KATIE_EMAIL, credentials.KATIE_PASSWORD, 2008, 2009),
+        (credentials.JULIAN_EMAIL, credentials.JULIAN_PASSWORD, 2010, 2012),
+        (credentials.SALLY_EMAIL, credentials.SALLY_PASSWORD, 2013, 2016),
+        (credentials.TOMMY_EMAIL, credentials.TOMMY_PASSWORD, 2017, 2019)
     )
     nresults = set()
 
