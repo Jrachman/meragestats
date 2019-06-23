@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 import csv
+import time
 import sel_linkedin
 import credentials  # this is a module that I created in order to hold my credentials
 
@@ -15,13 +16,12 @@ def urls_from_csv(filename):
 def soft_load_page(driver):
     while True:
         elems = driver.find_elements_by_xpath('//button[@class="pv-profile-section__see-more-inline pv-profile-section__text-truncate-toggle link"]')
-        print(elems)
         if not elems:
-            print("done")
             break
 
         for e in elems:
-            e.click()
+            driver.execute_script("arguments[0].click();", e)
+            time.sleep(1)
 
 
 def get_profile_info(driver, profile_url):
@@ -60,4 +60,4 @@ if __name__ == "__main__":
 
     get_profile_info(driver, "/in/katie-xiong/")
 
-    driver.quit()
+    # driver.quit()
