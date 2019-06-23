@@ -3,8 +3,8 @@ import csv
 import sel_linkedin
 import credentials  # this is a module that I created in order to hold my credentials
 
-USER_EMAIL = credentials.JULIAN_EMAIL
-USER_PASSWORD = credentials.JULIAN_PASSWORD
+USER_EMAIL = credentials.GARRET_EMAIL
+USER_PASSWORD = credentials.GARRET_PASSWORD
 
 
 def urls_from_csv(filename):
@@ -31,8 +31,8 @@ def get_profile_info(driver, profile_url):
     #     then SCOOP THE SOUP!
 
     soup = BeautifulSoup(driver.page_source, "html.parser")
-    content = soup.find("ul", {"id": "ember133"})
-    print(content.prettify())
+    content = soup.find_all("li", {"class": "pv-profile-section__sortable-card-item"})
+    print(content)
 
 
 if __name__ == "__main__":
