@@ -99,7 +99,7 @@ def get_profile_urls_merage_page(driver, from_year, to_year):
                 time.sleep(SCROLL_PAUSE_TIME)
                 # Calculate new scroll height and compare with last scroll height
                 new_height = driver.execute_script("return document.body.scrollHeight")
-                if counter == 20:
+                if counter == 30:
                     break
                 else:
                     counter += 1
@@ -128,7 +128,7 @@ def create_csv_from_set(set_of_profiles):
     with open("merage_links.csv", "w") as ml:
         cml = csv.writer(ml)
         for link in set_of_profiles:
-            cml.writerow(link)
+            cml.writerow([link])
 
 
 def gather_merage_profiles(multiple_at_once=False):
@@ -155,7 +155,7 @@ def gather_merage_profiles(multiple_at_once=False):
 
 
 if __name__ == "__main__":
-    final_set = multiprocess_gather_merage_profiles()
+    final_set = gather_merage_profiles()
     print(final_set, len(final_set))
 
-    create_csv_from_set(list(final_set))
+    create_csv_from_set(final_set)
