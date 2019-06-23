@@ -12,6 +12,18 @@ def urls_from_csv(filename):
         return list(csv.reader(f))
 
 
+def soft_load_page(driver):
+    while True:
+        elems = driver.find_elements_by_xpath('//button[@class="pv-profile-section__see-more-inline pv-profile-section__text-truncate-toggle link"]')
+        print(elems)
+        if not elems:
+            print("done")
+            break
+
+        for e in elems:
+            e.click()
+
+
 def get_profile_info(driver, profile_url):
     driver.get(f"{sel_linkedin.LINKEDIN_ROOT_URL}{profile_url}")
 
@@ -29,6 +41,8 @@ def get_profile_info(driver, profile_url):
     #     click!
     #   - repeat the first step and if no buttons' text matches the 2 options,
     #     then SCOOP THE SOUP!
+
+    soft_load_page(driver)
 
     soup = BeautifulSoup(driver.page_source, "html.parser")
     content = soup.find_all("li", {"class": "pv-profile-section__sortable-card-item"})
