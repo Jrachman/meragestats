@@ -48,16 +48,31 @@ def soft_load_page(driver):
     wait = WebDriverWait(driver, 30)
     wait.until(wait_for_more_than_n_elements((By.XPATH, path_to_company_cards), len(companies)))
 
+# need to gather
+#   - comapny name / company url
+#   - position(s) / duration of time
+# format: [company name, company url, position, duration of time]
+
 
 def get_info_multiple_positions_to_company(driver, content):
+    company_name = content.find("h3", {"class": "t-16 t-black t-bold"}).text[14:-1]
+    company_url = content.find("a", {"data-control-name": "background_details_company"}).get("href")
+    print(f"{company_name}, {company_url}")
+
     positions = [c.text[7:-1] for c in content.find_all("h3", {"class": "t-14 t-black t-bold"})]
-    for p in positions:
-        print(p)
+    durations = [c.text[16:-1] for c in content.find_all("h4", {"class": "pv-entity__date-range t-14 t-black t-normal"})]
+    for p, d in zip(positions, durations):
+        print(f"\t{p}, {d}")
 
 
 def get_info_single_position_to_company(driver, content):
+    company_name = content.find("h4", {"class": "t-16 t-black t-normal"}).text[14:-1]
+    company_url = content.find("a", {"data-control-name": "background_details_company"}).get("href")
+    print(f"{company_name}, {company_url}")
+
     position = content.find("h3", {"class": "t-16 t-black t-bold"}).text
-    print(position)
+    duration = content.find("h4", {"class": "pv-entity__date-range t-14 t-black--light t-normal"}).text[16:-1]
+    print(f"\t{position}, {duration}")
 
 
 def get_profile_info(driver, profile_url):
