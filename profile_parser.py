@@ -49,6 +49,17 @@ def soft_load_page(driver):
     wait.until(wait_for_more_than_n_elements((By.XPATH, path_to_company_cards), len(companies)))
 
 
+def get_info_multiple_positions_to_company(driver, content):
+    positions = [c.text[7:-1] for c in content.find_all("h3", {"class": "t-14 t-black t-bold"})]
+    for p in positions:
+        print(p)
+
+
+def get_info_single_position_to_company(driver, content):
+    position = content.find("h3", {"class": "t-16 t-black t-bold"}).text
+    print(position)
+
+
 def get_profile_info(driver, profile_url):
     driver.get(f"{sel_linkedin.LINKEDIN_ROOT_URL}{profile_url}")
 
@@ -84,8 +95,10 @@ def get_profile_info(driver, profile_url):
 
         if c.find_all("ul", {"class": "pv-entity__position-group mt2"}):
             print("this is (1)")
+            get_info_multiple_positions_to_company(driver, c)
         else:
             print("this is (2)")
+            get_info_single_position_to_company(driver, c)
 
 
 if __name__ == "__main__":
