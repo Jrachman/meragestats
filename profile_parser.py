@@ -3,6 +3,25 @@ import csv
 import time
 import sel_linkedin
 import credentials  # this is a module that I created in order to hold my credentials
+from selenium.common.exceptions import StaleElementReferenceException
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+
+
+class wait_for_more_than_n_elements(object):
+    def __init__(self, locator, count):
+        self.locator = locator
+        self.count = count
+
+    def __call__(self, driver):
+        try:
+            count = len(EC._find_elements(driver, self.locator))
+            print(count, self.count)
+            return count > self.count
+        except StaleElementReferenceException:
+            return False
+
 
 USER_EMAIL = credentials.GARRET_EMAIL
 USER_PASSWORD = credentials.GARRET_PASSWORD
@@ -14,6 +33,9 @@ def urls_from_csv(filename):
 
 
 def soft_load_page(driver):
+    path_to_company_cards = '//div[@class="pv-entity__logo company-logo"]'
+    companies = driver.find_elements_by_xpath(path_to_company_cards)
+
     while True:
         elems = driver.find_elements_by_xpath('//button[@class="pv-profile-section__see-more-inline pv-profile-section__text-truncate-toggle link"]')
         if not elems:
@@ -22,6 +44,9 @@ def soft_load_page(driver):
         for e in elems:
             driver.execute_script("arguments[0].click();", e)
             time.sleep(1)
+
+    wait = WebDriverWait(driver, 30)
+    wait.until(wait_for_more_than_n_elements((By.XPATH, path_to_company_cards), len(companies)))
 
 
 def get_profile_info(driver, profile_url):
@@ -43,10 +68,21 @@ def get_profile_info(driver, profile_url):
     #     then SCOOP THE SOUP!
 
     soft_load_page(driver)
-
+    reg_loaded_li_class = "pv-profile-section__sortable-card-item pv-profile-section pv-position-entity ember-view"
+    soft_loaded_li_class = "pv-profile-section__card-item-v2 pv-profile-section pv-position-entity ember-view"
     soup = BeautifulSoup(driver.page_source, "html.parser")
-    content = soup.find_all("li", {"class": "pv-profile-section__sortable-card-item"})
-    print(content)
+    content_reg = soup.find_all("li", {"class": reg_loaded_li_class})
+    content_soft = soup.find_all("li", {"class": soft_loaded_li_class})
+    content = content_reg + content_soft
+    print(content, len(content))
+    print(content[0].prettify())
+
+    for c in content:
+        # there are 2 categories:
+        #   (1) companies that have multiple positions
+        #   (2) one to one, company to position
+
+        pass
 
 
 if __name__ == "__main__":
@@ -60,4 +96,4 @@ if __name__ == "__main__":
 
     get_profile_info(driver, "/in/katie-xiong/")
 
-    # driver.quit()
+    driver.quit()
