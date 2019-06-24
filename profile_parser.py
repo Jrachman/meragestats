@@ -82,7 +82,10 @@ def get_profile_info(driver, profile_url):
         #   (1) companies that have multiple positions
         #   (2) one to one, company to position
 
-        pass
+        if c.find_all("ul", {"class": "pv-entity__position-group mt2"}):
+            print("this is (1)")
+        else:
+            print("this is (2)")
 
 
 if __name__ == "__main__":
