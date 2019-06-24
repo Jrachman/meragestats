@@ -54,25 +54,30 @@ def soft_load_page(driver):
 # format: [company name, company url, position, duration of time]
 
 
-def get_info_multiple_positions_to_company(driver, content):
+def get_info_multiple_positions_to_company(driver, user_name, content):
+    profile_info = []
+
     company_name = content.find("h3", {"class": "t-16 t-black t-bold"}).text[14:-1]
     company_url = content.find("a", {"data-control-name": "background_details_company"}).get("href")
-    print(f"{company_name}, {company_url}")
+    company_info = [[company_name, company_url]]
 
     positions = [c.text[7:-1] for c in content.find_all("h3", {"class": "t-14 t-black t-bold"})]
     durations = [c.text[16:-1] for c in content.find_all("h4", {"class": "pv-entity__date-range t-14 t-black t-normal"})]
     for p, d in zip(positions, durations):
-        print(f"\t{p}, {d}")
+        profile_info.append([user_name, company_name, p, d])
+
+    return company_info, profile_info
 
 
-def get_info_single_position_to_company(driver, content):
+def get_info_single_position_to_company(driver, user_name, content):
     company_name = content.find("h4", {"class": "t-16 t-black t-normal"}).text[14:-1]
     company_url = content.find("a", {"data-control-name": "background_details_company"}).get("href")
-    print(f"{company_name}, {company_url}")
+    company_info = [[company_name, company_url]]
 
     position = content.find("h3", {"class": "t-16 t-black t-bold"}).text
     duration = content.find("h4", {"class": "pv-entity__date-range t-14 t-black--light t-normal"}).text[16:-1]
-    print(f"\t{position}, {duration}")
+
+    return company_info, [[user_name, company_name, position, duration]]
 
 
 def get_profile_info(driver, profile_url):
@@ -97,23 +102,32 @@ def get_profile_info(driver, profile_url):
     reg_loaded_li_class = "pv-profile-section__sortable-card-item pv-profile-section pv-position-entity ember-view"
     soft_loaded_li_class = "pv-profile-section__card-item-v2 pv-profile-section pv-position-entity ember-view"
     soup = BeautifulSoup(driver.page_source, "html.parser")
+
+    user_name = soup.find("li", {"class": "inline t-24 t-black t-normal break-words"}).text[13:-11]
     content_reg = soup.find_all("li", {"class": reg_loaded_li_class})
     content_soft = soup.find_all("li", {"class": soft_loaded_li_class})
     content = content_reg + content_soft
-    print(content, len(content))
-    print(content[0].prettify())
 
+    company_dir = []
+    profile_dir = []
     for c in content:
         # there are 2 categories:
         #   (1) companies that have multiple positions
         #   (2) one to one, company to position
 
         if c.find_all("ul", {"class": "pv-entity__position-group mt2"}):
-            print("this is (1)")
-            get_info_multiple_positions_to_company(driver, c)
+            # (1)
+            company_info, profile_info = get_info_multiple_positions_to_company(driver, user_name, c)
+            company_dir += company_info
+            profile_dir += profile_info
         else:
-            print("this is (2)")
-            get_info_single_position_to_company(driver, c)
+            # (2)
+            company_info, profile_info = get_info_single_position_to_company(driver, user_name, c)
+            company_dir += company_info
+            profile_dir += profile_info
+
+    print('\n'.join('{}: {}'.format(*k) for k in enumerate(company_dir)))
+    print('\n'.join('{}: {}'.format(*k) for k in enumerate(profile_dir)))
 
 
 if __name__ == "__main__":
